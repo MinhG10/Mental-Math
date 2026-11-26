@@ -13,15 +13,27 @@ export function setupPractice(engine, levelLabel) {
   const answer = byId('answer');
   const questionTimer = byId('question-timer');
   const form = byId('answer-form');
+  const check = byId('check-answer');
+  const toggleNegative = byId('toggle-negative');
+  const answerPane = byId('play-answer');
   const panes = Object.fromEntries(['idle', 'question', 'feedback', 'paused', 'summary'].map(name => [name, byId('play-' + name)]));
   let shownQuestionId;
   let state;
   answer.maxLength = LIMITS.answerChars;
+  form.addEventListener('pointerdown', event => {
+    // Keep the keyboard open when a tap would move focus to a button.
+    if (event.button === 0 && document.activeElement === answer && event.target.closest('button')) event.preventDefault();
+  });
   form.addEventListener('submit', event => {
     event.preventDefault();
-    if (state === 'question') engine.submit(answer.value, shownQuestionId);
+    if (state !== 'question') return;
+    answer.focus();
+    engine.submit(answer.value, shownQuestionId);
   });
-  byId('toggle-negative').addEventListener('click', () => {
+  answer.addEventListener('beforeinput', event => {
+    if (state === 'feedback') event.preventDefault();
+  });
+  toggleNegative.addEventListener('click', () => {
     answer.value = answer.value.startsWith('-') ? answer.value.slice(1) : '-' + answer.value.replace(/^\+/, '');
     answer.focus();
   });
@@ -36,6 +48,8 @@ export function setupPractice(engine, levelLabel) {
     state = snapshot.state;
     const visible = state === 'finished' ? 'summary' : state;
     for (const [name, pane] of Object.entries(panes)) pane.hidden = name !== visible;
+    answerPane.hidden = state !== 'question' && state !== 'feedback';
+    check.disabled = toggleNegative.disabled = state !== 'question';
     setText(byId('practice-state'), labels[state]);
     byId('settings-fields').disabled = active;
     const layout = document.querySelector('.practice-layout');
@@ -76,6 +90,7 @@ export function setupPractice(engine, levelLabel) {
       title.className = feedback.status;
       setText(title, STATUS[feedback.status]);
       setText(byId('feedback-answer'), feedbackText(feedback));
+      if (previous === 'paused' && !byId('practice').hidden) answer.focus();
     }
     if (result && previous !== 'finished') {
       setText(byId('summary-caption'), snapshot.error || (result.reason === 'challenge'

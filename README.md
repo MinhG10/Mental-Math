@@ -1,4 +1,4 @@
-# Mental Math V1.0
+# Mental Math V1.0.2
 
 Mental Math is a browser-based mental arithmetic trainer for adults. It uses HTML, CSS, and JavaScript ES modules, runs on a static web server, and stores data locally. The English interface supports dark mode, keyboard input, and small screens.
 
@@ -25,8 +25,8 @@ In VS Code, open the `Mental Math` folder, install the Live Server extension if 
 | 3.1 · Comprehensive Arithmetic | Choose your topics and difficulty. **Random Questions** draws individual questions from earlier levels. **Mixed Expressions** combines selected topics in one expression. |
 
 1. Choose a level and adjust its settings. You can set a timer for each question, add a time limit for the whole session, and change the feedback duration.
-2. Select **Start**. Enter your answer and press Enter or select **Check**. Both decimal points and decimal commas are accepted. Use **±** to enter a negative number if your phone keyboard lacks a minus key.
-3. Use **Skip**, **Pause**, **Resume**, or **Finish** as needed. The next question appears automatically after feedback. After finishing, review the summary or select **Restart**.
+2. Select **Start**. Enter your answer and press Enter or select **Check** below the input. Both decimal points and decimal commas are accepted. Use **±** next to the input to enter a negative number if your phone keyboard lacks a minus key.
+3. Use **Skip**, **Pause**, **Resume**, or **Finish** as needed. The next question appears automatically after feedback. After checking an answer, the input stays focused so you can type as soon as the next question appears. After finishing, review the summary or select **Restart**.
 4. Open **History** to review settings, results, and individual questions or filter for incorrect answers. Open **Statistics** to see your metrics and four charts. Use the level selector to narrow the results.
 
 Accuracy is the share of completed questions you answered correctly, including skipped and timed-out questions in the denominator. Average, fastest, and slowest answer times use only questions with submitted answers. The historical average is calculated across individual submitted answers. The best streak is the longest recorded within a single session.

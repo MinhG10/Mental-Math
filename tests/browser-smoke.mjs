@@ -158,7 +158,7 @@ try {
   await evaluate(`
     for (const box of document.querySelectorAll('#level-fields .options input')) box.checked = box.value === '+';
   `);
-  await control('timer-feedbackMs', '100');
+  await control('timer-feedbackMs', '750');
   await click('start');
   assert.deepEqual(await evaluate("return [document.activeElement.id, q('#settings-fields').disabled, q('#settings-error').textContent]"), ['answer', true, '']);
   await evaluate("q('#answer-form').requestSubmit()");
@@ -174,8 +174,45 @@ try {
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', unmodifiedText: '\r', windowsVirtualKeyCode: 13 });
   await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   await waitFor("q('#question-number').textContent === 'QUESTION 2'", 'Enter and next question');
-  await evaluate("q('#answer').value = '-1'; q('#answer-form').requestSubmit()");
+  assert(await evaluate("return document.activeElement === q('#answer') && q('#answer').value === ''"));
+  for (const width of [1440, 390, 320]) {
+    await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width <= 390 });
+    assert(await evaluate(`
+      const answer = q('#answer').getBoundingClientRect();
+      const sign = q('#toggle-negative').getBoundingClientRect();
+      const check = q('#check-answer').getBoundingClientRect();
+      return sign.top === answer.top && sign.left >= answer.right && check.top >= answer.bottom
+        && check.height > answer.height && check.width === q('#answer-form').getBoundingClientRect().width;
+    `), `answer controls have the wrong layout at ${width}px`);
+    assert(await evaluate(`return document.documentElement.scrollWidth <= ${width}`));
+  }
+  await send('Emulation.setTouchEmulationEnabled', { enabled: true });
+  await evaluate(`
+    const answer = q('#answer');
+    answer.value = '1';
+    q('#toggle-negative').click();
+    answer.addEventListener('blur', () => { answer.dataset.blurred = 'true'; }, { once: true });
+  `);
+  assert.equal(await evaluate("return q('#answer').value"), '-1');
+  const touchPoint = await evaluate(`
+    const check = q('#check-answer');
+    check.scrollIntoView({ block: 'center' });
+    const { x, y, width, height } = check.getBoundingClientRect();
+    return { x: x + width / 2, y: y + height / 2 };
+  `);
+  await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [touchPoint] });
+  await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  assert(await evaluate(`
+    return !q('#play-feedback').hidden && q('#feedback-title').className === 'incorrect'
+      && q('#check-answer').disabled && document.activeElement === q('#answer');
+  `));
   await waitFor("q('#question-number').textContent === 'QUESTION 3'", 'wrong answer and next question');
+  assert(await evaluate(`
+    const answer = q('#answer');
+    return document.activeElement === answer && !answer.dataset.blurred && answer.value === '';
+  `));
+  await send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  console.log('PASS Answer layout and uninterrupted input focus after tapping Check');
   await click('skip');
   await click('finish');
   await click('tab-history');

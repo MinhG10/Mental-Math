@@ -1,6 +1,6 @@
 const scope = self.registration.scope;
 const prefix = `mental-math:${scope}:`;
-const cacheName = prefix + 'v1.0.1';
+const cacheName = prefix + 'v1.0.2';
 const shell = [
   './index.html', './manifest.json',
   './assets/icons/icon.svg', './assets/icons/icon-192.png', './assets/icons/icon-512.png', './assets/icons/apple-touch-icon.png',
