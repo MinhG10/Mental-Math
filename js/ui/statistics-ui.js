@@ -6,7 +6,7 @@ import { chartCard } from './chart-ui.js';
 
 export function setupStatistics(registry, onFilter) {
   const filter = byId('stats-filter');
-  fillOptions(filter, [['', 'Tất cả Level'], ...registry.list().map(level => [level.id, `Level ${level.id}`])]);
+  fillOptions(filter, [['', 'All levels'], ...registry.list().map(level => [level.id, `Level ${level.id}`])]);
   filter.addEventListener('change', onFilter);
 }
 
@@ -16,32 +16,32 @@ export function renderStatistics(sessions, registry, levelLabel) {
   const totals = summarizeHistory(filtered);
   const metrics = element('div', 'metrics');
   renderMetrics(metrics, [
-    ['Phiên đã lưu', totals.sessions], ['Đã làm', totals.total], ['Đúng', totals.correct, 'correct'],
-    ['Sai', totals.incorrect, 'incorrect'], ['Bỏ qua', totals.skipped], ['Hết giờ', totals.timeout, 'timeout'],
-    ['Chính xác', formatPercent(totals.accuracy)], ['TB trả lời', formatDuration(totals.averageMs)], ['Chuỗi tốt nhất', totals.bestStreak],
+    ['Saved sessions', totals.sessions], ['Completed', totals.total], ['Correct', totals.correct, 'correct'],
+    ['Incorrect', totals.incorrect, 'incorrect'], ['Skipped', totals.skipped], ['Timed out', totals.timeout, 'timeout'],
+    ['Accuracy', formatPercent(totals.accuracy)], ['Avg. answer time', formatDuration(totals.averageMs)], ['Best streak', totals.bestStreak],
   ]);
   const chronological = [...filtered].reverse();
   const points = key => chronological.map((session, index) => ({
-    label: formatDate(session.startedAt), axisLabel: `Phiên ${index + 1}`, value: session.stats[key],
+    label: formatDate(session.startedAt), axisLabel: `Session ${index + 1}`, value: session.stats[key],
   }));
   const ids = filter ? [filter] : [...new Set([...registry.list().map(level => level.id), ...filtered.map(session => session.levelId)])];
   const byLevel = ids.map(id => ({ id, ...summarizeHistory(filtered.filter(session => session.levelId === id)) }));
   const charts = element('div', 'chart-grid');
   charts.append(
-    chartCard('Tiến độ chính xác', points('accuracy'), { format: formatPercent, max: 100 }),
-    chartCard('Tiến độ thời gian trả lời', points('averageMs'), { format: value => `${(value / 1000).toFixed(2)}s` }),
-    chartCard('Câu đúng theo phiên', points('correct'), { format: String, integers: true }),
-    chartCard('Độ chính xác theo Level', byLevel.map(row => ({
+    chartCard('Accuracy over time', points('accuracy'), { format: formatPercent, max: 100 }),
+    chartCard('Answer time over time', points('averageMs'), { format: value => `${(value / 1000).toFixed(2)}s` }),
+    chartCard('Correct answers per session', points('correct'), { format: String, integers: true }),
+    chartCard('Accuracy by level', byLevel.map(row => ({
       label: levelLabel(row.id), axisLabel: row.id, value: row.total ? row.accuracy : null,
     })), { format: formatPercent, max: 100, bars: true }),
   );
   const breakdown = element('section', 'card level-table');
   const scroll = element('div', 'table-scroll');
   scroll.tabIndex = 0;
-  scroll.setAttribute('aria-label', 'Kết quả theo Level');
+  scroll.setAttribute('aria-label', 'Results by level');
   const table = element('table');
   const headings = table.createTHead().insertRow();
-  for (const label of ['Level', 'Phiên', 'Đã làm', 'Đúng', 'Sai', 'Bỏ qua', 'Hết giờ', 'Chính xác', 'TB trả lời', 'Chuỗi tốt nhất']) {
+  for (const label of ['Level', 'Sessions', 'Completed', 'Correct', 'Incorrect', 'Skipped', 'Timed out', 'Accuracy', 'Avg. answer time', 'Best streak']) {
     const cell = element('th', '', label);
     cell.scope = 'col';
     headings.append(cell);
@@ -54,6 +54,6 @@ export function renderStatistics(sessions, registry, levelLabel) {
     for (const value of cells) tr.insertCell().textContent = value;
   }
   scroll.append(table);
-  breakdown.append(element('h2', '', 'Kết quả theo Level'), scroll);
+  breakdown.append(element('h2', '', 'Results by level'), scroll);
   byId('statistics-content').replaceChildren(metrics, charts, breakdown);
 }

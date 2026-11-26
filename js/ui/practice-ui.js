@@ -4,10 +4,10 @@ import { formatDuration } from '../utils/format-utils.js';
 import { byId, message, setText } from './dom.js';
 import { renderMetrics, sessionMetrics } from './metrics-ui.js';
 
-const labels = { idle: 'Sẵn sàng', question: 'Đang luyện', feedback: 'Phản hồi', paused: 'Tạm dừng', finished: 'Đã kết thúc' };
+const labels = { idle: 'Ready', question: 'In progress', feedback: 'Feedback', paused: 'Paused', finished: 'Finished' };
 const emptyStats = summarizeQuestions([]);
-const seconds = ms => `${Math.ceil(ms / 1000)} giây`;
-const feedbackText = feedback => `Đáp án đúng: ${feedback.question.correctAnswer}${feedback.question.metadata?.percent ? '%' : ''}`;
+const seconds = ms => `${Math.ceil(ms / 1000)}s`;
+const feedbackText = feedback => `Correct answer: ${feedback.question.correctAnswer}${feedback.question.metadata?.percent ? '%' : ''}`;
 
 export function setupPractice(engine, levelLabel) {
   const answer = byId('answer');
@@ -48,7 +48,7 @@ export function setupPractice(engine, levelLabel) {
     byId('resume').hidden = state !== 'paused';
     const sessionTimer = byId('session-timer');
     message(sessionTimer, active && snapshot.sessionRemaining !== null
-      ? `Còn ${seconds(snapshot.sessionRemaining)} cho thử thách` : '');
+      ? `${seconds(snapshot.sessionRemaining)} left in this session` : '');
     questionTimer.hidden = !question || snapshot.questionRemaining === null;
     if (!questionTimer.hidden) {
       const max = session.timers.questionSeconds * 1000;
@@ -63,10 +63,10 @@ export function setupPractice(engine, levelLabel) {
       const expression = byId('expression');
       setText(expression, question.expression);
       expression.classList.toggle('long', question.expression.length > 24);
-      setText(byId('question-number'), `CÂU ${session.stats.total + 1}`);
+      setText(byId('question-number'), `QUESTION ${session.stats.total + 1}`);
       const rounding = question.metadata?.rounding;
-      message(byId('question-hint'), rounding !== undefined ? `Làm tròn đến ${rounding} chữ số thập phân.`
-        : question.metadata?.percent ? 'Nhập giá trị phần trăm.' : '');
+      message(byId('question-hint'), rounding !== undefined ? `Round to ${rounding} decimal ${rounding === 1 ? 'place' : 'places'}.`
+        : question.metadata?.percent ? 'Enter your answer as a percentage.' : '');
       if (!byId('practice').hidden) answer.focus({ preventScroll: previous === 'question' });
     }
     message(byId('answer-error'), snapshot.inputError);
@@ -79,13 +79,13 @@ export function setupPractice(engine, levelLabel) {
     }
     if (result && previous !== 'finished') {
       setText(byId('summary-caption'), snapshot.error || (result.reason === 'challenge'
-        ? 'Đã hết thời gian thử thách.' : 'Kết quả phiên luyện tập của bạn.'));
+        ? 'The session time limit has been reached.' : 'Your practice results are below.'));
       message(byId('summary-feedback'), result.reason === 'challenge' && feedback?.status === 'timeout' ? feedbackText(feedback) : '');
       renderMetrics(byId('summary-metrics'), sessionMetrics(result.stats, result.durationMs));
       if (!byId('practice').hidden) byId('restart').focus({ preventScroll: true });
     }
     if (state === 'paused' && previous !== 'paused' && !byId('practice').hidden) byId('resume').focus();
-    setText(byId('live-level'), session ? levelLabel(session.levelId) : 'Chưa bắt đầu phiên');
+    setText(byId('live-level'), session ? levelLabel(session.levelId) : 'No session started');
     renderMetrics(byId('live-metrics'), sessionMetrics(session?.stats ?? emptyStats, snapshot.elapsed));
   };
 }

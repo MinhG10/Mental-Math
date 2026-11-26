@@ -29,9 +29,9 @@ export class StorageService {
     const raw = this.storage.getItem(key);
     if (raw === null) return fallback;
     let data;
-    try { data = JSON.parse(raw); } catch { throw new Error('Dữ liệu lưu trữ bị hỏng (JSON).'); }
+    try { data = JSON.parse(raw); } catch { throw new Error('Stored data contains invalid JSON.'); }
     if (data?.schemaVersion !== schemaVersion || !Object.hasOwn(data, 'value')) {
-      throw new Error('Phiên bản dữ liệu lưu trữ không được hỗ trợ.');
+      throw new Error('This storage version is not supported.');
     }
     return data.value;
   }
@@ -41,15 +41,15 @@ export class StorageService {
       this.storage.setItem(key, JSON.stringify({ schemaVersion, value }));
     } catch (error) {
       throw new Error(error.name === 'QuotaExceededError'
-        ? 'Bộ nhớ trình duyệt đã đầy. Không thể lưu dữ liệu.'
-        : 'Không thể ghi vào bộ nhớ trình duyệt.');
+        ? 'Browser storage is full.'
+        : 'Could not write to browser storage.');
     }
   }
 
   readHistory() {
     const sessions = this.read(keys.history, []);
     if (!Array.isArray(sessions) || !sessions.every(validSession)) {
-      throw new Error('Cấu trúc lịch sử luyện tập bị hỏng.');
+      throw new Error('Stored practice history has an invalid format.');
     }
     return sessions.sort(byNewest).slice(0, LIMITS.history)
       .map(session => ({ ...session, stats: summarizeQuestions(session.questions) }));
@@ -79,7 +79,7 @@ export class StorageService {
   readSettings() {
     const settings = this.read(keys.settings, null);
     if (settings !== null && (!object(settings) || !object(settings.levels) || !object(settings.timers))) {
-      throw new Error('Cấu trúc cấu hình luyện tập bị hỏng.');
+      throw new Error('Stored practice settings have an invalid format.');
     }
     return settings;
   }

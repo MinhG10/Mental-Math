@@ -16,7 +16,7 @@ export function chartCard(title, data, { format, max, bars = false, integers = f
   card.append(element('h2', '', title));
   const visible = data.filter(point => point.value !== null);
   if (!visible.length) {
-    card.append(element('p', 'muted field-help', 'Chưa có dữ liệu để vẽ biểu đồ.'));
+    card.append(element('p', 'muted field-help', 'No data to chart yet.'));
     return card;
   }
   const chart = svgElement('svg', { class: 'chart', viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': title });
@@ -56,7 +56,7 @@ export function chartCard(title, data, { format, max, bars = false, integers = f
   });
   if (!bars) chart.insertBefore(svgElement('path', { d: path, class: 'series' }), chart.children[10] ?? null);
   const details = element('details', 'chart-values');
-  details.append(element('summary', '', 'Xem giá trị'));
+  details.append(element('summary', '', 'View values'));
   const values = element('ol');
   for (const { label, value } of data) values.append(element('li', '', `${label} · ${value === null ? '—' : format(value)}`));
   details.append(values);

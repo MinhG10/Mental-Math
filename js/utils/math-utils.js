@@ -9,12 +9,12 @@ export class Fraction {
   constructor(numerator, denominator = 1n) {
     const n = BigInt(numerator);
     const d = BigInt(denominator);
-    if (!d) throw new RangeError('Không thể chia cho 0.');
+    if (!d) throw new RangeError('Cannot divide by zero.');
     const divisor = gcd(n, d);
     this.n = (d < 0n ? -n : n) / divisor;
     this.d = (d < 0n ? -d : d) / divisor;
     if (this.n.toString(2).length > 256 || this.d.toString(2).length > 256) {
-      throw new RangeError('Biểu thức vượt giới hạn tính toán.');
+      throw new RangeError('The expression exceeds the calculation limit.');
     }
     Object.freeze(this);
   }

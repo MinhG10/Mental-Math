@@ -5,7 +5,7 @@ import { defineLevel, expressionQuestion, negativeField, operandField } from './
 
 const schema = [
   operandField,
-  { key: 'count', label: 'Số lượng toán hạng', type: 'range', presets: [3, 4, 5, 6], min: 3, max: LIMITS.mixedOperands },
+  { key: 'count', label: 'Number of operands', type: 'range', presets: [3, 4, 5, 6], min: 3, max: LIMITS.mixedOperands },
   negativeField,
 ];
 const operators = ['+', '-', '*', '/'];
@@ -51,9 +51,9 @@ export function generateMixed(settings, rng) {
       }
     }
   }
-  throw new RangeError('Không tạo được biểu thức phù hợp. Hãy giảm giới hạn hoặc số lượng toán hạng.');
+  throw new RangeError('Could not generate an expression. Lower the maximum operand or use fewer operands.');
 }
 
 export const level11 = defineLevel({
-  id: '1.1', name: 'Mixed Arithmetic', title: 'Biểu thức phối hợp', description: 'Luyện thứ tự ưu tiên của các phép toán.',
+  id: '1.1', name: 'Mixed Arithmetic', description: 'Practice the order of operations.',
 }, schema, { limit: 99, count: 4, allowNegative: false }, generateMixed);

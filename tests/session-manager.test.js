@@ -14,7 +14,7 @@ export function sampleSession(index = 0, results = [['correct', 500]]) {
   return manager.finish(2000, 'finished');
 }
 
-test('Tổng kết phiên và thống kê gộp, tỷ lệ và thời gian có đúng mẫu số', () => {
+test('Session and aggregate statistics use the correct denominators for accuracy and response time', () => {
   const session = sampleSession(0, [['correct', 500], ['correct', 1000], ['incorrect', 1500], ['skipped', 2000], ['timeout', 3000]]);
   const second = sampleSession(1, [['correct', 2000]]);
   equal(session.stats.total, 5);
@@ -33,15 +33,15 @@ test('Tổng kết phiên và thống kê gộp, tỷ lệ và thời gian có �
   equal(aggregate.bestStreak, 2);
 });
 
-test('Level mới và trình kiểm tra đáp án riêng hoạt động với Practice Engine nguyên trạng', () => {
+test('A new level and its custom validator work with the existing practice engine', () => {
   const level = {
-    id: '4', name: 'Phân số thử nghiệm', getDefaultSettings: () => ({}), getSettingsSchema: () => [],
+    id: '4', name: 'Sample fractions', getDefaultSettings: () => ({}), getSettingsSchema: () => [],
     validateSettings: settings => settings,
     generateQuestion: () => ({ expression: '1 ÷ 2', correctAnswer: '0.5', answerType: 'decimal', metadata: {} }),
     validateAnswer: input => ({ valid: true, correct: input === '1/2', input }),
   };
   const registry = new LevelRegistry().register(level);
-  throws(() => registry.register(level), /đã được đăng ký/);
+  throws(() => registry.register(level), /already registered/);
   const engine = new PracticeEngine(new QuestionEngine(registry), { now: () => 42, schedule: () => 1, cancel: () => {} });
   engine.start('4', {}, DEFAULT_TIMERS);
   engine.submit('1/2');

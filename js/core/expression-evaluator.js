@@ -16,15 +16,15 @@ export function displayExpression(tokens) {
 }
 
 export function evaluateExpression(tokens, { integersOnly = false } = {}) {
-  if (!tokens.length || tokens.length > LIMITS.expressionTokens) throw new RangeError('Kích thước biểu thức không hợp lệ.');
+  if (!tokens.length || tokens.length > LIMITS.expressionTokens) throw new RangeError('Invalid expression length.');
   const values = [];
   const operators = [];
   let needsValue = true;
   let depth = 0;
-  const malformed = () => new SyntaxError('Biểu thức không hợp lệ.');
+  const malformed = () => new SyntaxError('Invalid expression.');
   function checked(value) {
     if (integersOnly && (value.d !== 1n || value.n > maxInteger || value.n < -maxInteger)) {
-      throw new RangeError('Kết quả trung gian phải là số nguyên an toàn.');
+      throw new RangeError('Intermediate results must be safe integers.');
     }
     return value;
   }
@@ -37,7 +37,7 @@ export function evaluateExpression(tokens, { integersOnly = false } = {}) {
   // Reduce equal precedence before pushing the next operator for left associativity.
   for (const token of tokens) {
     if (token === '(' && needsValue) {
-      if (++depth > LIMITS.expressionDepth) throw new RangeError('Biểu thức có quá nhiều dấu ngoặc lồng nhau.');
+      if (++depth > LIMITS.expressionDepth) throw new RangeError('The expression has too many nested parentheses.');
       operators.push(token);
     } else if (token === ')' && !needsValue && depth) {
       while (operators.at(-1) !== '(') reduceOperator();

@@ -132,10 +132,15 @@ try {
   await send('Page.navigate', { url: url + 'tests/test-runner.html' });
   await waitFor("q('#summary')?.dataset.complete", 'browser unit tests');
   assert.equal(await evaluate("return q('#summary').dataset.complete"), 'pass');
+  assert.equal(await evaluate('return document.documentElement.lang'), 'en');
   console.log('PASS Browser unit test runner under /MentalMath/');
 
   await send('Page.navigate', { url });
   await waitFor("q('#level-select')?.options.length === 5 && navigator.serviceWorker.controller", 'app and service worker');
+  assert.equal(await evaluate('return document.documentElement.lang'), 'en');
+  assert.deepEqual(await evaluate("return [...document.querySelectorAll('main h1')].map(heading => heading.textContent)"),
+    ['Practice', 'History', 'Statistics']);
+  assert.equal(await evaluate("return (await (await fetch('./manifest.json')).json()).lang"), 'en');
   assert.equal(await evaluate("return q('#answer').inputMode"), 'decimal');
   for (const width of [1440, 1024, 768, 390, 320]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: width <= 390 });
@@ -168,9 +173,9 @@ try {
   `);
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', unmodifiedText: '\r', windowsVirtualKeyCode: 13 });
   await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  await waitFor("q('#question-number').textContent === 'CÂU 2'", 'Enter and next question');
+  await waitFor("q('#question-number').textContent === 'QUESTION 2'", 'Enter and next question');
   await evaluate("q('#answer').value = '-1'; q('#answer-form').requestSubmit()");
-  await waitFor("q('#question-number').textContent === 'CÂU 3'", 'wrong answer and next question');
+  await waitFor("q('#question-number').textContent === 'QUESTION 3'", 'wrong answer and next question');
   await click('skip');
   await click('finish');
   await click('tab-history');

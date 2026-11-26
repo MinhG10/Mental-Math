@@ -3,8 +3,8 @@ import { randomInt } from '../utils/random-utils.js';
 import { defineLevel, expressionQuestion, operandField } from './level-helpers.js';
 
 const schema = [
-  { key: 'mode', label: 'Dạng bài', type: 'select', options: { both: 'Kết hợp cả hai', square: 'Bình phương', root: 'Căn bậc hai' } },
-  { ...operandField, label: 'Giới hạn cơ số hoặc căn', presets: [20, 50, 100, 200] },
+  { key: 'mode', label: 'Question type', type: 'select', options: { both: 'Both', square: 'Squares', root: 'Square roots' } },
+  { ...operandField, label: 'Maximum base or root', presets: [20, 50, 100, 200] },
 ];
 
 export function generateSquare({ mode, limit }, rng) {
@@ -16,5 +16,5 @@ export function generateSquare({ mode, limit }, rng) {
 }
 
 export const level3 = defineLevel({
-  id: '3', name: 'Square & Square Root', title: 'Bình phương và căn', description: 'Tính bình phương và căn bậc hai của số chính phương.',
+  id: '3', name: 'Squares & Square Roots', description: 'Calculate squares and find the square roots of perfect squares.',
 }, schema, { mode: 'both', limit: 50 }, generateSquare);

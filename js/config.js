@@ -10,4 +10,4 @@ export const DEFAULT_TIMERS = Object.freeze({
 });
 
 export const OPERATORS = { '+': '+', '-': '−', '*': '×', '/': '÷' };
-export const STATUS = { correct: 'Đúng', incorrect: 'Sai', skipped: 'Bỏ qua', timeout: 'Hết giờ' };
+export const STATUS = { correct: 'Correct', incorrect: 'Incorrect', skipped: 'Skipped', timeout: 'Time expired' };

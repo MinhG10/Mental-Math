@@ -22,7 +22,7 @@ function notice(key, text = '') {
 
 let settings;
 try { settings = storage.readSettings(); }
-catch (error) { notice('settings', `Không đọc được cấu hình. ${error.message}`); }
+catch (error) { notice('settings', `Could not load settings. ${error.message}`); }
 
 let tab = 'practice';
 let sessions = [];
@@ -36,7 +36,7 @@ function refreshHistory() {
     sessions = storage.readHistory();
     notice('history-read');
   } catch (error) {
-    notice('history-read', `Không đọc được lịch sử. ${error.message}`);
+    notice('history-read', `Could not load history. ${error.message}`);
   }
   byId('clear-history').disabled = !sessions.length && !notices.has('history-read') && !storage.pending.size;
   byId('retry-save').hidden = !storage.pending.size;
@@ -64,16 +64,16 @@ tabs.forEach((button, index) => {
 });
 setupStatistics(levelRegistry, renderTab);
 byId('clear-history').addEventListener('click', () => {
-  if (!globalThis.confirm('Bạn muốn xóa toàn bộ lịch sử trên trình duyệt này?')) return;
+  if (!globalThis.confirm('Clear all practice history in this browser?')) return;
   try {
     storage.clearHistory();
     notice('history-write');
-  } catch (error) { notice('history-write', `Không thể xóa lịch sử. ${error.message}`); }
+  } catch (error) { notice('history-write', `Could not clear history. ${error.message}`); }
   refreshHistory();
 });
 byId('retry-save').addEventListener('click', () => {
   try { storage.retry(); notice('history-write'); }
-  catch (error) { notice('history-write', `Phiên vẫn chưa được lưu. ${error.message}`); }
+  catch (error) { notice('history-write', `Could not save the session. ${error.message}`); }
   refreshHistory();
 });
 window.addEventListener('storage', event => {
@@ -90,7 +90,7 @@ const engine = new PracticeEngine(new QuestionEngine(levelRegistry), {
       storage.saveSession(snapshot.result);
       if (!storage.pending.size) notice('history-write');
     } catch (error) {
-      notice('history-write', `Phiên chưa được lưu. Có thể thử lại trong Lịch sử trước khi đóng trang. ${error.message}`);
+      notice('history-write', `The session could not be saved. Retry from History before closing this page. ${error.message}`);
     }
     refreshHistory();
   },
@@ -100,7 +100,7 @@ setupSettings(levelRegistry, settings, {
   onStart: ({ levelId, settings: levelSettings, timers }) => engine.start(levelId, levelSettings, timers),
   onSave(configuration) {
     try { storage.saveSettings(configuration); notice('settings'); }
-    catch (error) { notice('settings', `Không thể lưu cấu hình. ${error.message}`); }
+    catch (error) { notice('settings', `Could not save settings. ${error.message}`); }
   },
 });
 document.addEventListener('visibilitychange', () => { if (engine.active) engine.tick(); });
@@ -116,6 +116,6 @@ refreshHistory();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {
-    notice('offline', 'Không thể bật chế độ ngoại tuyến trên trình duyệt này.');
+    notice('offline', 'Offline mode could not be enabled in this browser.');
   });
 }

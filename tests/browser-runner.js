@@ -14,5 +14,5 @@ for (const { name, passed, error } of results) {
 }
 const summary = document.querySelector('#summary');
 const count = results.filter(item => item.passed).length;
-summary.textContent = `${count}/${results.length} bài đạt`;
+summary.textContent = `${count}/${results.length} tests passed`;
 summary.dataset.complete = count === results.length ? 'pass' : 'fail';

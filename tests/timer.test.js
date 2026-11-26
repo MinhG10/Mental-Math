@@ -24,7 +24,7 @@ function scenario(overrides = {}, registry = levelRegistry, id = '1') {
   };
 }
 
-test('Timer đo bằng timestamp, giới hạn và loại thời gian Pause', () => {
+test('Timer uses timestamps, enforces limits, and excludes paused time', () => {
   const timer = new Timer(0, 1000);
   equal(timer.elapsed(723), 723);
   timer.pause(800);
@@ -34,11 +34,11 @@ test('Timer đo bằng timestamp, giới hạn và loại thời gian Pause', ()
   equal(timer.elapsed(20_000), 1000);
   equal(new Timer(0).remaining(999), null);
   for (const time of ['', -1, 0, 'abc', 3601]) {
-    throws(() => validateTimers({ ...DEFAULT_TIMERS, timedQuestion: true, questionSeconds: time }), /số nguyên/);
+    throws(() => validateTimers({ ...DEFAULT_TIMERS, timedQuestion: true, questionSeconds: time }), /whole number/);
   }
 });
 
-test('Submit đúng tại deadline, nhấn liên tiếp và callback trễ chỉ ghi một Timeout', () => {
+test('A submission at the deadline, repeat actions, and late callbacks record a single timeout', () => {
   const run = scenario({ timedQuestion: true, questionSeconds: 1, sessionSeconds: 3 });
   const q = run.snapshot.question;
   run.move(1000, false);
@@ -55,7 +55,7 @@ test('Submit đúng tại deadline, nhấn liên tiếp và callback trễ chỉ
   equal(run.callbacks.size, 0);
 });
 
-test('Challenge tự kết thúc dù trình duyệt trì hoãn, có hoặc không có timer từng câu', () => {
+test('The session ends at its deadline even if callbacks are delayed, with or without a question timer', () => {
   for (const timedQuestion of [true, false]) {
     const run = scenario({ timedQuestion, questionSeconds: 5, sessionSeconds: 2 });
     run.move(12_500);
@@ -66,7 +66,7 @@ test('Challenge tự kết thúc dù trình duyệt trì hoãn, có hoặc khôn
   }
 });
 
-test('Pause và Resume đóng băng cả hai timer, ẩn câu và ngăn ghi kết quả', () => {
+test('Pausing freezes both timers, hides the question, and blocks submissions until resumed', () => {
   const run = scenario({ timedQuestion: true, questionSeconds: 2, sessionSeconds: 9 });
   const q = run.snapshot.question;
   run.move(500);
@@ -93,7 +93,7 @@ test('Pause và Resume đóng băng cả hai timer, ẩn câu và ngăn ghi kế
   equal(run.snapshot.session.stats.averageMs, 900);
 });
 
-test('Submit lỗi, câu cũ, hết phản hồi và Finish bảo toàn kết quả', () => {
+test('Invalid submissions, stale questions, feedback transitions, and Finish preserve results', () => {
   const run = scenario({ feedbackMs: 0 });
   const q = run.snapshot.question;
   run.engine.submit('');

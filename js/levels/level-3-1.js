@@ -6,12 +6,12 @@ import { level3 } from './level-3.js';
 import { defineLevel, difficultyField, expressionQuestion } from './level-helpers.js';
 
 const groups = {
-  basic: 'Số học cơ bản', mixed: 'Biểu thức phối hợp', percentage: 'Phần trăm',
-  decimal: 'Thập phân', square: 'Bình phương', root: 'Căn bậc hai',
+  basic: 'Basic arithmetic', mixed: 'Mixed arithmetic', percentage: 'Percentages',
+  decimal: 'Decimals', square: 'Squares', root: 'Square roots',
 };
 const schema = [
-  { key: 'mode', label: 'Chế độ', type: 'select', options: { random: 'Random Questions', mixed: 'Mixed Expressions' } },
-  { key: 'groups', label: 'Nhóm phép toán', type: 'multi', options: groups },
+  { key: 'mode', label: 'Mode', type: 'select', options: { random: 'Random Questions', mixed: 'Mixed Expressions' } },
+  { key: 'groups', label: 'Topics', type: 'multi', options: groups },
   difficultyField,
 ];
 const scales = {
@@ -35,7 +35,7 @@ function generateGroup(group, difficulty, rng, inExpression) {
 }
 
 export const level31 = defineLevel({
-  id: '3.1', name: 'Comprehensive Arithmetic', title: 'Số học tổng hợp', description: 'Trộn các chủ đề hoặc kết hợp chúng trong cùng biểu thức.',
+  id: '3.1', name: 'Comprehensive Arithmetic', description: 'Switch between topics or combine them in one expression.',
 }, schema, { mode: 'random', groups: Object.keys(groups), difficulty: 'medium' }, (settings, rng) => {
   const { mode, difficulty } = settings;
   const first = pick(settings.groups, rng);

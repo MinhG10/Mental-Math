@@ -3,11 +3,11 @@ import { element, setText } from './dom.js';
 
 export function sessionMetrics(stats, elapsed) {
   return [
-    ['Đã làm', stats.total], ['Đúng', stats.correct, 'correct'], ['Sai', stats.incorrect, 'incorrect'],
-    ['Bỏ qua', stats.skipped], ['Hết giờ', stats.timeout, 'timeout'], ['Chính xác', formatPercent(stats.accuracy)],
-    ['Tổng thời gian', formatDuration(elapsed)], ['TB trả lời', formatDuration(stats.averageMs)],
-    ['Nhanh nhất', formatDuration(stats.fastestMs)], ['Chậm nhất', formatDuration(stats.slowestMs)],
-    ['Chuỗi hiện tại', stats.currentStreak], ['Chuỗi tốt nhất', stats.bestStreak],
+    ['Completed', stats.total], ['Correct', stats.correct, 'correct'], ['Incorrect', stats.incorrect, 'incorrect'],
+    ['Skipped', stats.skipped], ['Timed out', stats.timeout, 'timeout'], ['Accuracy', formatPercent(stats.accuracy)],
+    ['Total time', formatDuration(elapsed)], ['Avg. answer time', formatDuration(stats.averageMs)],
+    ['Fastest answer', formatDuration(stats.fastestMs)], ['Slowest answer', formatDuration(stats.slowestMs)],
+    ['Current streak', stats.currentStreak], ['Best streak', stats.bestStreak],
   ];
 }
 

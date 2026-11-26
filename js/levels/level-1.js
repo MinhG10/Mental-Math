@@ -3,7 +3,7 @@ import { pick, randomInt } from '../utils/random-utils.js';
 import { defineLevel, expressionQuestion, negativeField, operandField } from './level-helpers.js';
 
 const schema = [
-  { key: 'operators', label: 'Phép toán', type: 'multi', options: { '+': '+ Cộng', '-': '− Trừ', '*': '× Nhân', '/': '÷ Chia' } },
+  { key: 'operators', label: 'Operations', type: 'multi', options: { '+': '+ Add', '-': '− Subtract', '*': '× Multiply', '/': '÷ Divide' } },
   operandField, negativeField,
 ];
 
@@ -28,5 +28,5 @@ export function generateBasic(settings, rng) {
 }
 
 export const level1 = defineLevel({
-  id: '1', name: 'Basic Arithmetic', title: 'Số học cơ bản', description: 'Bốn phép tính với số nguyên.',
+  id: '1', name: 'Basic Arithmetic', description: 'Practice all four operations with whole numbers.',
 }, schema, { operators: ['+', '-', '*', '/'], limit: 99, allowNegative: false }, generateBasic);

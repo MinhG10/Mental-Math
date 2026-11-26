@@ -3,15 +3,15 @@ import { displayExpression, evaluateExpression } from '../core/expression-evalua
 import { validateFields } from '../utils/validation-utils.js';
 
 export const operandField = {
-  key: 'limit', label: 'Giới hạn toán hạng', type: 'range',
+  key: 'limit', label: 'Maximum operand', type: 'range',
   presets: [99, 999, 9999], min: 1, max: LIMITS.operand,
 };
 
-export const negativeField = { key: 'allowNegative', label: 'Cho phép kết quả âm', type: 'checkbox' };
+export const negativeField = { key: 'allowNegative', label: 'Allow negative answers', type: 'checkbox' };
 
 export const difficultyField = {
-  key: 'difficulty', label: 'Độ khó', type: 'select',
-  options: { easy: 'Easy · Dễ', medium: 'Medium · Vừa', hard: 'Hard · Khó' },
+  key: 'difficulty', label: 'Difficulty', type: 'select',
+  options: { easy: 'Easy', medium: 'Medium', hard: 'Hard' },
 };
 
 export function defineLevel(info, schema, defaults, generateQuestion) {
@@ -29,7 +29,7 @@ export function expressionQuestion(tokens, options = {}) {
   const exact = result.decimal(options.maxPlaces ?? 24);
   const rounding = exact === null ? options.rounding : undefined;
   const correctAnswer = exact ?? (rounding === undefined ? null : result.round(rounding));
-  if (correctAnswer === null) throw new RangeError('Kết quả có quá nhiều chữ số thập phân.');
+  if (correctAnswer === null) throw new RangeError('The result has too many decimal places.');
   return {
     expression: options.expression ?? displayExpression(tokens),
     correctAnswer,

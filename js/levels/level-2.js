@@ -1,16 +1,17 @@
 import { valueToken } from '../core/expression-evaluator.js';
 import { LIMITS } from '../config.js';
 import { Fraction, formatScaled } from '../utils/math-utils.js';
+import { percentagePrompts } from '../utils/format-utils.js';
 import { pick, randomInt } from '../utils/random-utils.js';
 import { defineLevel, difficultyField, expressionQuestion, operandField } from './level-helpers.js';
 
 export const percentageGroups = {
-  of: 'Phần trăm của một số', ratio: 'Tìm tỷ lệ phần trăm', change: 'Tăng hoặc giảm', decimal: 'Phép tính thập phân',
+  of: 'Percentage of a number', ratio: 'Find the percentage', change: 'Percentage change', decimal: 'Decimal arithmetic',
 };
 const schema = [
-  { key: 'groups', label: 'Nhóm bài tập', type: 'multi', options: percentageGroups },
+  { key: 'groups', label: 'Question types', type: 'multi', options: percentageGroups },
   operandField,
-  { key: 'places', label: 'Số chữ số thập phân tối đa', type: 'integer', min: 0, max: LIMITS.decimalPlaces },
+  { key: 'places', label: 'Maximum decimal places', type: 'integer', min: 0, max: LIMITS.decimalPlaces },
   difficultyField,
 ];
 const common = [5, 10, 20, 25, 50, 75];
@@ -43,7 +44,7 @@ export function generatePercentage(group, settings, rng) {
     const total = valueToken(formatScaled(base, places));
     const part = valueToken(total.value.multiply(ratio).decimal());
     return expressionQuestion([part, '/', total, '*', valueToken(100)], {
-      expression: `${part.label} chiếm bao nhiêu % của ${total.label}?`,
+      expression: percentagePrompts.ratio(part.label, total.label),
       metadata: { group, percent: true },
     });
   }
@@ -53,11 +54,11 @@ export function generatePercentage(group, settings, rng) {
     : randomInt(1, baseCap, rng));
   const product = [percentageToken, '*', base];
   if (group === 'of') return expressionQuestion(product, {
-    expression: `${percent}% của ${base.label}`, metadata: { group },
+    expression: percentagePrompts.of(percent, base.label), metadata: { group },
   });
   const increase = rng() < 0.5;
   return expressionQuestion([base, increase ? '+' : '-', ...product], {
-    expression: increase ? `Tăng ${base.label} thêm ${percent}%` : `Giảm ${base.label} đi ${percent}%`,
+    expression: (increase ? percentagePrompts.increase : percentagePrompts.decrease)(base.label, percent),
     metadata: { group },
   });
 }
@@ -82,7 +83,7 @@ export function generateDecimal(settings, rng) {
 }
 
 export const level2 = defineLevel({
-  id: '2', name: 'Percentage & Decimal', title: 'Phần trăm và thập phân', description: 'Tỷ lệ, tăng giảm và số thập phân.',
+  id: '2', name: 'Percentages & Decimals', description: 'Work with percentages, percentage changes, and decimals.',
 }, schema, { groups: Object.keys(percentageGroups), limit: 999, places: 2, difficulty: 'medium' },
 (settings, rng) => {
   const group = pick(settings.groups, rng);

@@ -14,7 +14,7 @@ class MemoryStorage {
   }
 }
 
-test('LocalStorage trống, cấu hình gần nhất và reload qua service mới', () => {
+test('Storage starts empty and restores saved settings and history in a new instance', () => {
   const adapter = new MemoryStorage();
   const service = new StorageService(adapter);
   equal(service.readHistory().length, 0);
@@ -27,7 +27,7 @@ test('LocalStorage trống, cấu hình gần nhất và reload qua service mớ
   equal(JSON.parse(adapter.getItem(keys.history)).schemaVersion, schemaVersion);
 });
 
-test('Lưu chính xác 30 phiên gần nhất và bỏ phiên không có câu đã hoàn thành', () => {
+test('Storage keeps the 30 most recent sessions and omits sessions without completed questions', () => {
   const service = new StorageService(new MemoryStorage());
   service.saveSession(sampleSession(0, []));
   equal(service.readHistory().length, 0);
@@ -42,7 +42,7 @@ test('Lưu chính xác 30 phiên gần nhất và bỏ phiên không có câu đ
   equal(service.readHistory().length, 0);
 });
 
-test('JSON lỗi, schema lạ, quota và bộ nhớ bị chặn được báo rõ', () => {
+test('Storage reports invalid JSON, unsupported versions, quota errors, and blocked access', () => {
   const adapter = new MemoryStorage();
   const service = new StorageService(adapter);
   adapter.setItem(keys.history, '{');
@@ -51,14 +51,14 @@ test('JSON lỗi, schema lạ, quota và bộ nhớ bị chặn được báo r�
   equal(adapter.getItem(keys.history), '{');
   adapter.removeItem(keys.history);
   adapter.full = true;
-  throws(() => service.retry(), /đã đầy/);
+  throws(() => service.retry(), /storage is full/);
   equal(service.pending.size, 1);
   equal(service.readHistory().length, 0);
   adapter.full = false;
   service.retry();
   equal(service.readHistory().length, 1);
   adapter.setItem(keys.settings, '{"schemaVersion":99,"value":null}');
-  throws(() => service.readSettings(), /Phiên bản/);
+  throws(() => service.readSettings(), /storage version/);
   const blocked = new StorageService({ setItem() { throw new Error('blocked'); } });
-  throws(() => blocked.saveSettings({}), /Không thể ghi/);
+  throws(() => blocked.saveSettings({}), /Could not write/);
 });

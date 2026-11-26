@@ -1,30 +1,30 @@
-# Hướng dẫn phát triển Mental Math
+# Mental Math Development Guide
 
-## Mục tiêu
+## Goal
 
-Duy trì ứng dụng tĩnh luyện tính nhẩm cho người lớn. Giữ giao diện tiếng Việt, dark mode, thao tác bàn phím, responsive, PWA ngoại tuyến và khả năng chạy trực tiếp từ thư mục con trên GitHub Pages.
+Maintain a static mental arithmetic trainer for adults. Keep the interface in English and preserve dark mode, keyboard input, responsive layouts, offline PWA support, and direct deployment to a GitHub Pages subdirectory.
 
-## Kiến trúc và quy ước
+## Architecture and conventions
 
-- Dùng HTML, CSS và JavaScript ES Modules với đường dẫn tương đối. Dùng `const` mặc định, `let` khi cần gán lại và tên định danh tiếng Anh. Giữ thông báo người dùng bằng tiếng Việt.
-- `js/core/` giữ trạng thái luyện tập, đánh giá đáp án, đồng hồ và registry. Phép tính chỉ nằm trong evaluator, các Level và tiện ích toán học. Dùng token và phân số chính xác cho số thập phân, tuyệt đối tránh thực thi biểu thức dưới dạng mã JavaScript.
-- `js/services/` giữ logic lưu và thống kê. `js/ui/` nhận tương tác, sinh trường từ schema, hiển thị dữ liệu và phản hồi. `js/app.js` nối các thành phần và sự kiện vòng đời trang.
-- Mỗi câu có một ID và tối đa một kết quả. Mọi đường Submit và Skip phải kiểm tra deadline trước khi ghi. Pause đóng băng timer phiên và timer câu, giữ ẩn biểu thức. Thời gian phản hồi nằm ngoài thời gian trả lời của câu tiếp theo.
-- Giữ các tính năng và hành vi đã hoạt động khi mở rộng dự án. Chỉ thay đổi kiến trúc cốt lõi khi có lý do kỹ thuật rõ ràng và ghi lại phạm vi ảnh hưởng.
+- Use HTML, CSS, and JavaScript ES modules with relative paths. Prefer `const`, use `let` for reassignment, and use English for identifiers and user-facing messages.
+- Keep practice state, grading, timers, and the registry in `js/core/`. Put arithmetic in the evaluator, levels, and math utilities. Use tokens and exact fractions for decimal arithmetic. Never execute expressions as JavaScript code.
+- Put storage and statistics logic in `js/services/`. Use `js/ui/` for interaction, schema-driven fields, and rendering. Wire the components and browser lifecycle events in `js/app.js`.
+- Give each question one ID and record at most one result. Every submit and skip path must check deadlines before recording a result. Pause freezes both timers and hides the question. Feedback is excluded from the next question's answer time.
+- Preserve existing behavior when extending the project. Change the core architecture only when there is a clear technical reason, and document the impact.
 
-## Thêm Level
+## Add a level
 
-- Tạo module trong `js/levels/`, cung cấp thông tin Level, mặc định, Settings Schema, validation và generator. Dùng RNG được truyền vào và tái sử dụng evaluator cùng tiện ích đang có.
-- Trả về câu hỏi gồm `expression`, `correctAnswer`, `answerType`, `metadata`. Giữ metadata là dữ liệu JSON. Nếu cần cú pháp đáp án riêng, bổ sung `validateAnswer` theo contract trong README.
-- Đăng ký trong `js/levels/index.js`. UI, History và Statistics lấy danh sách từ registry. Bổ sung tài nguyên mới vào `sw.js` và viết test theo biên, độ khó và nhóm phép toán.
+- Create a module in `js/levels/` with level metadata, defaults, a settings schema, validation, and a question generator. Use the supplied RNG and reuse the evaluator and existing utilities.
+- Return `expression`, `correctAnswer`, `answerType`, and JSON-serializable `metadata`. For custom grading, provide `validateAnswer` as described in the README.
+- Register the level in `js/levels/index.js`. Practice, History, and Statistics use the registry. Add any new runtime files to `sw.js` and test limits, difficulties, and supported operations.
 
-## Lưu trữ và phát hành
+## Storage and release
 
-- Lưu cấu hình và tối đa 30 phiên trong các khóa JSON versioned của Storage Service. Giữ ID Level và cấu trúc bản ghi ổn định để đọc lại phiên cũ.
-- Khi đổi schema, bổ sung migration có test cho dữ liệu cũ, dữ liệu lỗi và phiên bản chưa hỗ trợ. Chỉ ghi dữ liệu sau khi xác thực và chuyển đổi thành công. Báo lỗi lưu rõ ràng và giữ phiên chưa lưu để có thể thử lại trong trang.
-- Khi thay đổi tài nguyên runtime, cập nhật danh sách precache và tăng phiên bản cache trong `sw.js`. Chỉ dọn cache theo prefix của scope hiện tại. Giữ URL tương đối và cập nhật số phiên bản hiển thị, tài liệu và ghi chú phát hành khi cần.
+- Store settings and up to 30 sessions using the Storage Service's versioned JSON keys. Keep level IDs and session records compatible with saved data.
+- When changing the schema, add a tested migration for old, invalid, and unsupported data. Write only after validation and conversion succeed. Report storage failures and retain unsaved sessions in memory so the user can retry.
+- When runtime files change, update the precache list and bump the version in `sw.js`. Delete only old caches belonging to the current scope. Keep URLs relative and update the displayed version, documentation, and release notes as needed.
 
-## Kiểm thử
+## Testing
 
-- Sau mỗi chỉnh sửa, chạy `node tests/run.mjs` hoặc mở `tests/test-runner.html` từ server tĩnh. Với thay đổi UI, lưu trữ hoặc PWA, chạy thêm `node tests/browser-smoke.mjs`.
-- Kiểm tra tính đúng của phép toán, giới hạn, luồng phím Enter, cạnh deadline, Pause/Resume, dữ liệu sau reload và khả năng chạy offline từ đường dẫn con. Ghi rõ môi trường, kết quả và phần chưa xác minh khi bàn giao.
+- After each change, run `node tests/run.mjs` or open `tests/test-runner.html` from a static server. For UI, storage, or PWA changes, also run `node tests/browser-smoke.mjs`.
+- Verify calculations, boundary values, Enter submission, actions near the deadline, pause and resume, persistence after reload, and offline use from a subdirectory. Record the test environment, results, and any unverified behavior when handing off the work.

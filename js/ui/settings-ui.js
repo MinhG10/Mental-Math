@@ -52,10 +52,10 @@ function fieldControl(field, initial, prefix) {
   const select = element('select');
   select.id = id;
   fillOptions(select, field.presets.map(value => [value, field.presetLabels?.[value] ?? value]));
-  select.add(new Option('Tùy chỉnh', 'custom'));
+  select.add(new Option('Custom', 'custom'));
   select.value = field.presets.includes(initial) ? String(initial) : 'custom';
   input.id = id + '-custom';
-  input.setAttribute('aria-label', field.label + ' tùy chỉnh');
+  input.setAttribute('aria-label', 'Custom value for ' + field.label.toLowerCase());
   input.placeholder = `${field.customMin ?? field.min}–${field.max}`;
   input.className = 'custom-value';
   const update = () => { input.hidden = select.value !== 'custom'; };
@@ -80,10 +80,10 @@ function buildFields(container, schema, values, prefix) {
 
 const readFields = controls => Object.fromEntries(Object.entries(controls).map(([key, control]) => [key, control.read()]));
 const timerSchema = [
-  { key: 'timedQuestion', label: 'Giới hạn thời gian cho mỗi câu hỏi', type: 'checkbox' },
-  { key: 'questionSeconds', label: 'Thời gian mỗi câu (giây)', type: 'range', presets: [10, 20, 30], min: 1, max: LIMITS.questionSeconds },
-  { key: 'sessionSeconds', label: 'Thử thách theo thời gian (giây)', type: 'range', presets: [0, 30, 60, 120], presetLabels: { 0: 'Không giới hạn' }, min: 0, customMin: 1, max: LIMITS.sessionSeconds },
-  { key: 'feedbackMs', label: 'Thời gian hiện phản hồi (ms)', type: 'integer', min: 0, max: LIMITS.feedbackMs },
+  { key: 'timedQuestion', label: 'Set a time limit per question', type: 'checkbox' },
+  { key: 'questionSeconds', label: 'Time per question (seconds)', type: 'range', presets: [10, 20, 30], min: 1, max: LIMITS.questionSeconds },
+  { key: 'sessionSeconds', label: 'Session time limit (seconds)', type: 'range', presets: [0, 30, 60, 120], presetLabels: { 0: 'No limit' }, min: 0, customMin: 1, max: LIMITS.sessionSeconds },
+  { key: 'feedbackMs', label: 'Feedback duration (ms)', type: 'integer', min: 0, max: LIMITS.feedbackMs },
 ];
 
 export function setupSettings(registry, saved, { onStart, onSave }) {
