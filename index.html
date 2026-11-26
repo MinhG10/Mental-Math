@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111214">
+  <meta name="description" content="Luyện tính nhẩm, xem lại đáp án và theo dõi tiến bộ với Mental Math.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Mental Math</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/responsive.css">
+  <script type="module" src="./js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">±</span>
+        <span>Mental<span class="brand-math">Math</span></span>
+      </div>
+      <nav aria-label="Điều hướng chính" class="tablist" role="tablist">
+        <button id="tab-practice" role="tab" aria-selected="true" aria-controls="practice" data-tab="practice"><span aria-hidden="true">⌁</span> Luyện tập</button>
+        <button id="tab-history" role="tab" aria-selected="false" aria-controls="history" tabindex="-1" data-tab="history"><span aria-hidden="true">◷</span> Lịch sử</button>
+        <button id="tab-statistics" role="tab" aria-selected="false" aria-controls="statistics" tabindex="-1" data-tab="statistics"><span aria-hidden="true">▥</span> Thống kê</button>
+      </nav>
+      <span class="version">V1.0</span>
+    </div>
+  </header>
+  <main class="shell">
+    <noscript><p class="notice">Bật JavaScript để luyện tập trên trình duyệt.</p></noscript>
+    <div id="storage-notice" class="notice" role="alert" hidden></div>
+    <section id="practice" role="tabpanel" aria-labelledby="tab-practice">
+      <div class="page-intro">
+        <p class="eyebrow">PHÒNG LUYỆN TÍNH NHẨM</p>
+        <h1>Luyện tập</h1>
+        <p>Chọn cấp độ, đặt nhịp độ và bắt đầu tính nhẩm.</p>
+      </div>
+      <div class="practice-layout">
+        <form id="settings-form" class="card settings-card" novalidate aria-labelledby="settings-title">
+          <div class="card-heading"><span aria-hidden="true">☷</span><h2 id="settings-title">Thiết lập</h2></div>
+          <fieldset id="settings-fields">
+            <legend class="sr-only">Cấu hình luyện tập</legend>
+            <label for="level-select" class="field-label">Cấp độ</label>
+            <select id="level-select"></select>
+            <p id="level-description" class="muted field-help"></p>
+            <div id="level-fields" class="field-stack"></div>
+            <div id="timer-fields" class="field-stack timer-fields"></div>
+          </fieldset>
+          <p id="settings-error" class="form-error" role="alert" hidden></p>
+        </form>
+        <section class="card play-card" aria-labelledby="play-title">
+          <div class="play-top">
+            <div class="card-heading"><span aria-hidden="true">⊹</span><h2 id="play-title">Phiên luyện tập</h2></div>
+            <span id="practice-state" class="state-label">Sẵn sàng</span>
+          </div>
+          <div id="session-timer" class="session-timer" hidden></div>
+          <div id="question-timer" class="timer" hidden>
+            <div><span>Mỗi câu</span><strong id="question-countdown"></strong></div>
+            <progress id="question-progress" value="0" max="1" aria-label="Thời gian còn lại mỗi câu"></progress>
+          </div>
+          <div class="play-stage">
+            <div id="play-idle" class="stage-message">
+              <span class="stage-mark" aria-hidden="true">+</span>
+              <h3>Sẵn sàng luyện tập?</h3>
+              <p>Nhấn Bắt đầu để nhận câu hỏi đầu tiên.</p>
+              <button id="start" class="primary" type="submit" form="settings-form">Bắt đầu</button>
+            </div>
+            <div id="play-paused" class="stage-message" hidden>
+              <span class="stage-mark" aria-hidden="true">Ⅱ</span>
+              <h3>Đã tạm dừng</h3>
+              <p>Đồng hồ sẽ chạy tiếp khi bạn tiếp tục.</p>
+            </div>
+            <div id="play-question" hidden>
+              <div id="question-number" class="eyebrow"></div>
+              <div id="expression" class="expression"></div>
+              <p id="question-hint" class="muted" hidden></p>
+              <form id="answer-form" novalidate>
+                <label for="answer" class="sr-only">Đáp án</label>
+                <input id="answer" type="text" inputmode="decimal" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Nhập đáp án" aria-describedby="answer-error">
+                <button class="primary" type="submit">Kiểm tra <span aria-hidden="true">↵</span></button>
+              </form>
+              <div class="answer-tools">
+                <button id="toggle-negative" class="subtle compact" type="button" aria-label="Đổi dấu âm hoặc dương">±</button>
+                <p id="answer-error" class="form-error" role="alert" hidden></p>
+              </div>
+            </div>
+            <div id="play-feedback" class="stage-message" role="status" hidden>
+              <h3 id="feedback-title"></h3>
+              <p id="feedback-answer"></p>
+            </div>
+            <div id="play-summary" class="stage-message" hidden>
+              <span class="stage-mark" aria-hidden="true">✓</span>
+              <h3>Hoàn thành phiên</h3>
+              <p id="summary-caption"></p>
+              <p id="summary-feedback" role="status" hidden></p>
+              <div id="summary-metrics" class="metrics summary-metrics"></div>
+              <button id="restart" class="primary" type="submit" form="settings-form">Bắt đầu lại</button>
+            </div>
+          </div>
+          <div id="play-controls" class="play-controls" hidden>
+            <button id="skip" class="subtle" type="button">Bỏ qua</button>
+            <button id="pause" class="subtle" type="button">Tạm dừng</button>
+            <button id="resume" class="primary" type="button" hidden>Tiếp tục</button>
+            <button id="finish" class="subtle finish" type="button">Kết thúc</button>
+          </div>
+        </section>
+        <aside class="card stats-card" aria-labelledby="live-title">
+          <div class="card-heading"><span aria-hidden="true">▥</span><h2 id="live-title">Trong phiên</h2></div>
+          <p id="live-level" class="muted field-help">Chưa bắt đầu phiên</p>
+          <div id="live-metrics" class="metrics live-metrics"></div>
+        </aside>
+      </div>
+    </section>
+    <section id="history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="page-intro heading-row">
+        <div><h1>Lịch sử</h1><p>Xem lại tối đa 30 phiên gần nhất và từng đáp án.</p></div>
+        <div class="actions">
+          <button id="retry-save" class="subtle" type="button" hidden>Lưu lại phiên</button>
+          <button id="clear-history" class="subtle danger" type="button">Xóa lịch sử</button>
+        </div>
+      </div>
+      <div id="history-content" class="history-list"></div>
+    </section>
+    <section id="statistics" role="tabpanel" aria-labelledby="tab-statistics" hidden>
+      <div class="page-intro heading-row">
+        <div><h1>Thống kê</h1><p>Theo dõi độ chính xác và tốc độ qua các phiên đã lưu.</p></div>
+        <label class="filter-label" for="stats-filter">Cấp độ <select id="stats-filter"></select></label>
+      </div>
+      <div id="statistics-content"></div>
+    </section>
+  </main>
+  <footer class="shell footer"><span>Mental Math</span><span>Dữ liệu luyện tập lưu trên thiết bị này</span></footer>
+</body>
+</html>
